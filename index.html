@@ -3,14 +3,33 @@
     <head>
         <meta charset="utf-8"/>
         <title>My Balcony</title>
-        <!-- <link rel="stylesheet" href="./styles.css" /> -->
+        <link rel="stylesheet" href="./styles.css" />
     </head>
     <body>
-        <div>
-            <a style="color:blue; font-size:20px" href="https://greasyfork.org/scripts/474468-fund-monitor/code/Fund%20Monitor.user.js" display:none=""> <b>网页列表</b> </a>
-            <ul style="color:violet, font-size:18px">
-            <li><a href="./exchange_rate.html">汇率观察</a></li>
-            </ul>
-        </div>
+        <table class="pagelist">
+            <tbody>
+                <tr>
+                    <td><ul><li><a class="pagelink" href="./exchange_rate/index.html">汇率观察</a></li></ul></td>
+                    <td><ul><li><a class="pagelink" href="./snowballmonitor/index.html">雪球监控</a></li></ul></td>
+                    <td><ul><li><a class="pagelink" href="./fundmonitor/index.html">基金实时估值监控</a></li></ul></td>
+                    <td><ul><li><a class="pagelink" href="./twenty_eighty/index.html">二八轮动</a></li></ul></td>
+                    <td><ul><li><a class="pagelink" href="./marketradar/index.html">市场雷达</a></li></ul></td>
+                </tr>
+            </tbody>
+        </table>
+      <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="100%" color=#987cb9 SIZE=3>
+      <div class="manual">
+        <p style="color:red; font-size:12px"> 首次使用时，请根据浏览器类型，选择安装一个用户脚本管理器（Tampermonkey 或 Violentmonkey）</p>
+        <ul style="font-size:12px">
+        <li>Microsoft Edge：<a href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd">Tampermonkey</a> 或 <a href="https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao">Violentmonkey</a></li>
+        <li>Chrome：<a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo">Tampermonkey</a> 或 <a href="https://chrome.google.com/webstore/detail/violent-monkey/jinjaccalgkegednnccohejagnlnfdag">Violentmonkey</a></li>
+        <li>Firefox：<a href="https://addons.mozilla.org/firefox/addon/greasemonkey/">Greasemonkey</a>、<a href="https://addons.mozilla.org/firefox/addon/tampermonkey/">Tampermonkey</a> 或 <a href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a></li>
+        <li>Safari：<a href="http://tampermonkey.net/?browser=safari">Tampermonkey</a> 或 <a href="https://apps.apple.com/app/userscripts/id1463298887">Userscripts</a></li>
+        <li>Opera：<a href="https://addons.opera.com/extensions/details/tampermonkey-beta/">Tampermonkey</a> 或 <a href="https://violentmonkey.github.io/get-it/">Violentmonkey</a></li>
+        </ul>
+      </div>
+      <div>
+          <p align="right" style="color:red; font-size:14px"><b>重要提示：数据来源网络公开信息，不对数据准确性负责，仅作学习交流，请勿用于其他用途</b></p>
+      </div>
     </body>
 </html>

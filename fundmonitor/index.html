@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="基金实时估值监控" />
+    <meta name="author" content="LX" />
+    <title>基金实时估值监控</title>
+    <link rel="shortcut icon" href="https://htmlpage.cn/favicon.png">
+    <style>
+      @font-face {
+        font-family: Unicons;
+        src: url(fonts/Unicons.woff2) format("woff2"), url(fonts/Unicons.woff) format("woff");
+        font-weight: 400;
+        font-style: normal;
+        font-display: block
+      }
+
+      @font-face {
+        font-family: Custom;
+        src: url(fonts/Custom.woff2) format("woff2"), url(fonts/Custom.woff) format("woff");
+      }
+
+      span.countdown {
+          /* 转化span模式，使span能设置宽高 */
+          display: inline-block;
+          width: 40px;
+          height: 40px;
+          background-color: #3a4896;
+          color: #fff;
+          font-weight: 900;
+          /* 使方块中文字居中 */
+          text-align: center;
+          line-height: 40px;
+      }
+
+      #countDownNum1 {           
+            background-color: Transparent; 
+            border-style: none;
+            color: blue;
+            /* outline: none; */
+      }
+    </style>
+    <link rel="stylesheet" href="./css/user-style.css">
+  </head>
+  <body>
+      <link rel="shortcut icon" href="https://htmlpage.cn/favicon.png" />
+      <link rel="stylesheet" href="css/plugins.css" />
+      <link rel="stylesheet" href="css/style.css" />
+      <link rel="stylesheet" href="css/purple.css" />
+      <!-- <link rel="preload" href="css/thicccboi.css" as="style" /> -->
+      <div class="container pb-md-18">
+        <div style="text-align: right;">
+          <!-- <span class="hour countdown">1</span> <strong>:</strong> -->
+          <span class="countdown"><p id="minute">0</p></span> <strong>:</strong>
+          <span class="countdown"><p id="second">0</p></span>
+        </div>
+        
+        <div style="text-align:right;">
+          <input type="button" id="countDownNum1" value="设置刷新时间间隔" class="btn-lg"> 
+        </div>
+        <br>
+        <div id="mc_embed_signup_scroll2">
+          <div class="mc-field-group input-group form-floating">
+            <input type="text" value="" name="EMAIL" placeholder="Email地址" id="shuru" class="required email form-control" />
+            <label for="mce-EMAIL2" class="position-absolute">监控基金代码列表</label><input type="submit" value="提交" name="subscribe" id="xiugai" class="btn btn-primary" />
+          </div>
+          <!-- <div data-cue="fadeIn" data-delay="1600" class="row mt-12">
+          </div> -->
+          <!-- <div>
+            <input type="number" class="pagenum" value="">
+            <label for="mce-EMAIL2" class="position-absolute">刷新间隔时间（分钟）</label>
+          </div> -->
+        </div>
+        <span>
+          <p></p>
+        </span>
+        <!-- <div data-cue="fadeIn" data-delay="1600" class="row mt-12">
+        </div> -->
+        <div data-group="join" data-delay="900" class="d-flex justify-content-center">
+          <span>
+            <input type="button" id="huoqu" value="开始获取" class="btn btn-lg btn-primary rounded-pill mx-1">
+            <!-- <a href="https://htmlpage.cn/builder/" class="btn btn-lg btn-primary rounded-pill mx-1">开始获取</a> -->
+          </span>
+          <span>
+            <input type="button" id="tingzhi" value="停止获取" class="btn btn-lg btn-primary rounded-pill mx-1">
+            <!-- <a href="https://htmlpage.cn/contact" class="btn btn-lg btn-outline-primary rounded-pill mx-1">停止获取</a> -->
+          </span>
+        </div>
+        <br>
+        <div id="container">
+        </div>
+      </div>
+      <div class="manual">
+        <p style="color:red"> 首次使用时，请根据浏览器类型，选择安装一个用户脚本管理器（Tampermonkey 或 Violentmonkey）</p>
+        <ul>
+        <li>Microsoft Edge：<a href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd">Tampermonkey</a> 或 <a href="https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao">Violentmonkey</a></li>
+        <li>Chrome：<a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo">Tampermonkey</a> 或 <a href="https://chrome.google.com/webstore/detail/violent-monkey/jinjaccalgkegednnccohejagnlnfdag">Violentmonkey</a></li>
+        <li>Firefox：<a href="https://addons.mozilla.org/firefox/addon/greasemonkey/">Greasemonkey</a>、<a href="https://addons.mozilla.org/firefox/addon/tampermonkey/">Tampermonkey</a> 或 <a href="https://addons.mozilla.org/firefox/addon/violentmonkey/">Violentmonkey</a></li>
+        <li>Safari：<a href="http://tampermonkey.net/?browser=safari">Tampermonkey</a> 或 <a href="https://apps.apple.com/app/userscripts/id1463298887">Userscripts</a></li>
+        <li>Opera：<a href="https://addons.opera.com/extensions/details/tampermonkey-beta/">Tampermonkey</a> 或 <a href="https://violentmonkey.github.io/get-it/">Violentmonkey</a></li>
+        </ul>
+        <a href="https://ghproxy.com/https://raw.githubusercontent.com/datafanclub/fundmonitor/main/fundmonitor.js" display:none> 安装完脚本管理器后，再安装本脚本 </a>
+      </div>
+      <script src="js/plugins.js"></script>
+      <script src="js/theme.js"></script>
+  </body>
+<html>

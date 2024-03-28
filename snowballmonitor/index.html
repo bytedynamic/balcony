@@ -1,0 +1,177 @@
+<!--
+ * @Author: bytedynamic sufelin@qq.com
+ * @Date: 2023-12-18 10:18:29
+ * @LastEditors: bytedynamic sufelin@qq.com
+ * @LastEditTime: 2023-12-20 19:25:19
+ * @FilePath: \gitcode\gitee\bytedynamic\private\kitchen\snowball_monitor\index.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雪球监控</title>
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 2em;
+        }
+        
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+            border-top: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            margin: 50px auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        label {
+            /* display: block; */
+            margin-bottom: 5px;
+            /* display: inline-block; */
+        }
+
+        input[type="text"], input[type="email"] {
+            /* width: 40%; */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+            margin-bottom: 20px; */
+            /* display: inline-block;
+            /* float: left; */
+        }
+
+        button {
+            /* display: block; */
+            /* width: 30%; */
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            font-size: 16px;
+            cursor: pointer;
+            float: center;
+        }
+
+
+        /* div[id="configdata"] {
+            width: 90%;
+            display: block;
+            position: absolute;
+            bottom: 5px;
+        } */
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .container{
+            position: absolute;
+            width: 95%;
+            /* display: flex; */
+            /* top: 100px; */
+            bottom: 5px;
+        }
+        .left-group{
+            /* width: 200px; */
+            width: 50%;
+            /* background-color: #7ecff2; */
+            text-align: left;
+            display: inline-block;
+            
+        }
+        .mid-group{
+            /* flex: 1; */
+            width: 30%;
+            /* background-color: #ff5000; */
+            text-align: center;
+            display: inline-block;
+        }
+        .right-group{
+            flex: 1;
+            /* width: min-content; */
+            /* background-color: #7ecff2; */
+            text-align: right;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <span>
+            <a style="color:red; font-size:14px" href="https://update.greasyfork.org/scripts/482834/%E9%9B%AA%E7%90%83%E7%9B%91%E6%8E%A7.user.js" display:none=""> <b>安装脚本</b> </a>
+        </span>
+        <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="100%" color=#987cb9 SIZE=1>
+    </div>
+    <h1>股票信息展示</h1>
+    <div class="right-group">
+        <button type="submit" id="chaxun">查询</button>
+    </div>
+    <div class="table_container">
+        <table id="panel" align="center">
+            <thead>
+                <tr>
+                    <th>合约名称</th>
+                    <th>挂钩标的</th>
+                    <th>基准日</th>
+                    <th>期初价</th>
+                    <th>基准调整</th>
+                    <th>基准价</th>
+                    <th>最新交易日</th>
+                    <th>最新价</th>
+                    <th>盈亏状态</th>
+                </tr>
+            </thead>
+            <tbody id="panel_content">
+            </tbody>
+        </table>
+    </div>
+    <div class="container">
+            <div id="configdata">
+            <h3>挂钩标的</h3>
+            <div class="left-group">
+                <label for="name">挂钩标的名称</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="mid-group">
+                <label for="date_range">起始日</label>
+                <input type="text" id="date_range" required>
+            </div>
+            <div class="right-group">
+                <button type="submit" id="xiugai">提交修改</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
