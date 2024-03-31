@@ -1,3 +1,14 @@
+[Adblock Plus 2.0]
+! Title: UXNIL'S AD BLOCK LIST
+
+mail.163.com##div.mailgg
+mail.163.com##div[title="广告区"]
+tieba.baidu.com##div#fixed_bar
+tieba.baidu.com##a.j_click_stats
+tieba.baidu.com##div[id^="mediago-tb-frs-list"]
+tieba.baidu.com##ul.tbui_slideshow_list
+mini.eastday.com##div#iSlider-wrapper
+
 ! 2023-12-30 https://weibo.com
 weibo.com##.woo-picture-slot
 
