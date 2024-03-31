@@ -1,0 +1,10 @@
+! 2023-12-30 https://weibo.com
+weibo.com##.woo-picture-slot
+
+! 2024-03-16 https://newsupport.lenovo.com.cn
+newsupport.lenovo.com.cn##.lnv-dialog
+newsupport.lenovo.com.cn##.lnv-mask
+
+! 2024-03-31 https://www.zhihu.com
+www.zhihu.com##.Pc-feedAd-container
+www.zhihu.com##div.AdvertImg
