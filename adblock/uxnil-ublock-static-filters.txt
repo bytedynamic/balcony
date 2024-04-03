@@ -24,8 +24,10 @@ finance.sina.com.cn## div.m-p1-lb2_5
 www.zhihu.com##.Pc-feedAd-container
 www.zhihu.com##div.AdvertImg
 
-! 2024-04-03 https://*.hexun.com
+! 2024-04-03
 hexun.com##div.art_contextBox:style(height: 100% !important;)
 hexun.com##div.showall_img
 hexun.com##div.showAll
 hexun.com##div.bottomLayer
+!www.baidu.com##div.s-news-list-wrapper
+www.baidu.com##div.water-container
