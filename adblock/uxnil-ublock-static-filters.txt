@@ -16,6 +16,16 @@ weibo.com##.woo-picture-slot
 newsupport.lenovo.com.cn##.lnv-dialog
 newsupport.lenovo.com.cn##.lnv-mask
 
+! 2024-03-25 https://finance.sina.com.cn
+finance.sina.com.cn## #SFA_NV_POP
+finance.sina.com.cn## div.m-p1-lb2_5
+
 ! 2024-03-31 https://www.zhihu.com
 www.zhihu.com##.Pc-feedAd-container
 www.zhihu.com##div.AdvertImg
+
+! 2024-04-03 https://*.hexun.com
+hexun.com##div.art_contextBox:style(height: 100% !important;)
+hexun.com##div.showall_img
+hexun.com##div.showAll
+hexun.com##div.bottomLayer
