@@ -31,3 +31,6 @@ hexun.com##div.showAll
 hexun.com##div.bottomLayer
 !www.baidu.com##div.s-news-list-wrapper
 www.baidu.com##div.water-container
+
+! 2024-04-12
+fund.eastmoney.com##div#referAd
