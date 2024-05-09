@@ -34,3 +34,6 @@ www.baidu.com##div.water-container
 
 ! 2024-04-12
 fund.eastmoney.com##div#referAd
+
+! 2024-05-09 https://mail.126.com
+mail.126.com##.nui-closeable
