@@ -116,6 +116,15 @@
             text-align: right;
             display: inline-block;
         }
+        .grid-container {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr; /* 三列等宽 */
+        }
+        
+        .grid-item {
+          border: 0px solid #000; /* 仅为了可视化边框 */
+          padding: 10px; /* 内边距 */
+        }
     </style>
 </head>
 
@@ -127,7 +136,16 @@
         <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="100%" color=#987cb9 SIZE=1>
     </div>
     <h1>理财信息展示</h1>
-    <div class="right-group">
+    <div id="configdata" class="grid-container">
+        <div class="grid-item">
+            <label for="name">产品代码</label>
+            <input type="text" id="name" required>
+        </div>
+        <div class="grid-item">
+            <button type="submit" id="xiugai">提交修改</button>
+        </div>
+    </div>
+    <div class="grid-item">
         <button type="submit" id="chaxun">查询</button>
     </div>
     <div class="table_container">
@@ -148,22 +166,6 @@
             <tbody id="panel_content">
             </tbody>
         </table>
-    </div>
-    <div class="container">
-            <div id="configdata">
-            <h3>产品代码</h3>
-            <div class="left-group">
-                <label for="name">产品代码</label>
-                <input type="text" id="name" required>
-            </div>
-<!--             <div class="mid-group">
-                <label for="date_range">起始日</label>
-                <input type="text" id="date_range" required>
-            </div> -->
-            <div class="right-group">
-                <button type="submit" id="xiugai">提交修改</button>
-            </div>
-        </div>
     </div>
 </body>
 </html>
