@@ -13,8 +13,8 @@
 // @license     MIT
 // @author      -
 // @description 2024/4/12 12:55:55
-// @downloadURL https://update.greasyfork.org/scripts/474468/Fund%20Monitor.user.js
-// @updateURL https://update.greasyfork.org/scripts/474468/Fund%20Monitor.meta.js
+// @downloadURL https://raw.kkgithub.com/bytedynamic/balcony/refs/heads/main/user_scripts/fund_monitor.js
+// @updateURL https://raw.kkgithub.com/bytedynamic/balcony/refs/heads/main/user_scripts/fund_monitor.js
 // ==/UserScript==
 (function e() {
   "use strict";

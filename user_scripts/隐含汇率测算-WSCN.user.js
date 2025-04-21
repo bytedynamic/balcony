@@ -9,6 +9,8 @@
 // @license             MIT
 // @author              uxnil
 // @description         2024/3/27 23:29:58
+// @downloadURL https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/%E9%9A%90%E5%90%AB%E6%B1%87%E7%8E%87%E6%B5%8B%E7%AE%97-WSCN.user.js
+// @updateURL https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/%E9%9A%90%E5%90%AB%E6%B1%87%E7%8E%87%E6%B5%8B%E7%AE%97-WSCN.user.js
 // ==/UserScript==
 
 const getCurrentTime = () => {

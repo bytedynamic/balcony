@@ -9,6 +9,8 @@
 // @license MIT
 // @author      -
 // @description 2024/8/28 12:21:32
+// @downloadURL https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/%E7%90%86%E8%B4%A2%E7%9B%91%E6%8E%A7.user.js
+// @updateURL https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/%E7%90%86%E8%B4%A2%E7%9B%91%E6%8E%A7.user.js
 // ==/UserScript==
 (function () {
   "use strict";

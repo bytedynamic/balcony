@@ -11,8 +11,8 @@
 // @license     MIT
 // @author      lx
 // @description 2024/2/8 12:50:00
-// @downloadURL https://update.greasyfork.org/scripts/482998/%E4%BA%8C%E5%85%AB%E8%BD%AE%E5%8A%A8-EM.user.js
-// @updateURL https://update.greasyfork.org/scripts/482998/%E4%BA%8C%E5%85%AB%E8%BD%AE%E5%8A%A8-EM.meta.js
+// @downloadURL   https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/%E4%BA%8C%E5%85%AB%E8%BD%AE%E5%8A%A8-EM.user.js
+// @updateURL   https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/%E4%BA%8C%E5%85%AB%E8%BD%AE%E5%8A%A8-EM.user.js
 // ==/UserScript==
 (function () {
   "use strict";

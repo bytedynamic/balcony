@@ -12,6 +12,8 @@
 // @author      lx
 // @license MIT
 // @description 2024/2/8 12:50:00
+// @downloadURL https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/%E9%9B%AA%E7%90%83%E7%9B%91%E6%8E%A7.user.js
+// @updateURL https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/%E9%9B%AA%E7%90%83%E7%9B%91%E6%8E%A7.user.js
 // ==/UserScript==
 
 (function () {

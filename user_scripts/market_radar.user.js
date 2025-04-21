@@ -11,6 +11,8 @@
 // @author      lx
 // @license     MIT
 // @description 2024/2/8 12:50:00
+// @downloadURL https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/market_radar.user.js
+// @updateURL https://kkgithub.com/bytedynamic/balcony/raw/refs/heads/main/user_scripts/market_radar.user.js
 // ==/UserScript==
 
 // ==/UserScript==
