@@ -1,0 +1,13 @@
+.pagelink {
+     color: blue; 
+     font-size: 28px;
+     font-family: Microsoft YaHei UI;
+}
+
+table {
+    width: 100%;
+    box-sizing: border-box;
+    border: 0px solid rgb(200, 200, 200);
+    caption-side: bottom;
+    border-collapse: collapse;
+}
