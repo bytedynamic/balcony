@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>导出工具安装页面</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        .install-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #c41230;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: move; /* 提示用户这可以拖拽 */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .guide-img {
+            margin-top: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>安装“导出美化网页”工具</h1>
+    <p>请将下方的按钮拖拽到您的浏览器书签栏中：</p>
+    
+    <!-- 这里放上面提供的那段 <a> 标签代码，并加上 class="install-btn" -->
+    <a href="javascript:(function(){...这里省略具体JS代码...})();\" class="install-btn">
+        📥 导出美化网页
+    </a>
+
+    <div class="guide-img">
+        <p><strong>操作演示：</strong></p>
+        <p>1. 确保 Chrome 浏览器书签栏已显示（快捷键 Ctrl+Shift+B / Cmd+Shift+B）</p>
+        <p>2. 用鼠标按住上方按钮，拖拽到书签栏松开即可。</p>
+    </div>
+
+</body>
+</html>
