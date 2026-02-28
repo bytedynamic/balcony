@@ -10,6 +10,11 @@
 
 (function() {
     'use strict';
+    // 全局错误捕获
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+        alert('错误: ' + msg + '\n行号: ' + lineNo + '\n列号: ' + columnNo);
+        return false;
+    };
 
     // 创建悬浮按钮
     function createFloatingButton() {
