@@ -1,1 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#f4f7fc" />
+<title>间歇训练计时器</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
 
+  :root {
+    --ink: #0f172a;
+    --ink-soft: #46536b;
+    --muted: #8a94a6;
+    --line: #e6ebf4;
+    --track: #eef1f8;
+    --accent: #3b82f6;
+  }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 480px at 12% -8%, #e3ecff 0%, rgba(227, 236, 255, 0) 62%),
+      radial-gradient(760px 460px at 96% 108%, #e2f6f4 0%, rgba(226, 246, 244, 0) 58%),
+      linear-gradient(180deg, #f7f9fd 0%, #eef2fa 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @supports (align-items: safe center) {
+    body { align-items: safe center; }
+  }
+
+  .app {
+    width: min(440px, 100%);
+    padding: 22px 22px 20px;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+      0 28px 64px -28px rgba(16, 38, 84, 0.3),
+      0 2px 4px rgba(16, 38, 84, 0.04);
+    backdrop-filter: blur(18px) saturate(1.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  }
+
+  /* ---------- 头部 ---------- */
+  .head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  h1 {
+    margin: 0 0 3px;
+    font-size: 16.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  .sub {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+  }
+
+  .gear {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--ink-soft);
+    background: #fff;
+    border: 1px solid var(--line);
+    transition: color .2s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+  }
+
+  .gear:hover:not(:disabled) {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 32%, var(--line));
+  }
+
+  .gear:disabled { opacity: .3; cursor: default; }
+
+  .gear.on {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, #fff);
+    border-color: color-mix(in srgb, var(--accent) 26%, #fff);
+  }
+
+  /* ---------- 圆环 ---------- */
+  .dial {
+    position: relative;
+    width: min(292px, 78vw);
+    aspect-ratio: 1 / 1;
+    margin: 10px auto 2px;
+  }
+
+  .dial-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .track, .prog {
+    fill: none;
+    stroke-width: 11;
+  }
+
+  .track { stroke: var(--track); }
+
+  .prog {
+    stroke: var(--accent);
+    stroke-linecap: round;
+    transition: stroke .45s ease, opacity .3s ease;
+    filter: drop-shadow(0 3px 10px color-mix(in srgb, var(--accent) 30%, transparent));
+  }
+
+  .dial-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    pointer-events: none;
+  }
+
+  .phase {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
+    color: var(--accent);
+    transition: color .4s ease;
+  }
+
+  .time {
+    margin-top: 4px;
+    font-size: clamp(46px, 14.5vw, 58px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    line-height: 1.04;
+    transition: color .28s ease;
+  }
+
+  .time.sm {
+    font-size: clamp(32px, 10vw, 40px);
+    letter-spacing: 0.06em;
+  }
+
+  /* 最后 3 秒：数字变主色并轻微跳动 */
+  .time.hot { color: var(--accent); }
+  .time.beat { animation: beat .42s ease-out; }
+
+  @keyframes beat {
+    0%   { transform: scale(1);    opacity: 1; }
+    38%  { transform: scale(1.09); opacity: .78; }
+    100% { transform: scale(1);    opacity: 1; }
+  }
+
+  /* 阶段切换：圆环外扩一圈光晕 */
+  .dial::after {
+    content: "";
+    position: absolute;
+    inset: 5%;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .dial.flash::after { animation: ripple .8s cubic-bezier(.2, .6, .3, 1) 2; }
+
+  @keyframes ripple {
+    0%   { opacity: .5; transform: scale(1); }
+    100% { opacity: 0;  transform: scale(1.16); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .time.beat, .dial.flash::after { animation: none; }
+  }
+
+  .meta {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ---------- 组进度点 ---------- */
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    min-height: 8px;
+    margin: 10px 0 0;
+  }
+
+  .dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #dfe6f2;
+    transition: background .3s ease, opacity .3s ease, transform .3s ease;
+  }
+
+  .dots i.done { background: var(--accent); opacity: .38; }
+  .dots i.cur { background: var(--accent); transform: scale(1.55); }
+
+  /* ---------- 按钮 ---------- */
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1.55fr 1fr;
+    gap: 9px;
+    margin-top: 16px;
+  }
+
+  .btn {
+    height: 50px;
+    border-radius: 15px;
+    border: 1px solid transparent;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, transform .16s ease, opacity .2s ease, box-shadow .3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:active:not(:disabled) { transform: scale(0.975); }
+
+  .btn.ghost {
+    background: #f4f7fc;
+    border-color: var(--line);
+    color: var(--ink-soft);
+  }
+
+  .btn.ghost:hover:not(:disabled) { background: #eaf0fa; color: var(--ink); }
+  .btn.ghost:disabled { opacity: .38; cursor: default; }
+
+  .btn.primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--accent) 75%, transparent);
+  }
+
+  .btn.primary:hover { filter: brightness(1.04); }
+
+  /* ---------- 设置面板 ---------- */
+  .panel {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    display: grid;
+    gap: 8px;
+  }
+
+  .panel[hidden] { display: none; }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 36px;
+  }
+
+  .row > label { font-size: 13px; color: var(--ink-soft); }
+
+  .field { display: flex; align-items: center; gap: 5px; }
+  .field .u { font-size: 11.5px; color: var(--muted); }
+
+  .num {
+    width: 50px;
+    height: 34px;
+    padding: 0 2px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #fff;
+    text-align: center;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  .num::-webkit-outer-spin-button,
+  .num::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .num:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 13%, transparent);
+  }
+
+  .switch {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex: none;
+  }
+
+  .switch input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .switch i {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #dfe6f2;
+    transition: background .22s ease;
+    pointer-events: none;
+  }
+
+  .switch i::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(16, 38, 84, .22);
+    transition: transform .22s cubic-bezier(.4, .2, .2, 1);
+  }
+
+  .switch input:checked + i { background: var(--accent); }
+  .switch input:checked + i::after { transform: translateX(18px); }
+
+  .hint {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .warn {
+    margin: 0;
+    font-size: 11px;
+    color: #b45309;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 400px) {
+    .app { padding: 18px 16px 16px; border-radius: 22px; }
+    .actions { gap: 7px; }
+    .btn { height: 48px; font-size: 13.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="head">
+    <div>
+      <h1>间歇训练</h1>
+      <p class="sub" id="sub">4 组 · 每组 1 分 · 休息 1 分 · 共 7 分 10 秒</p>
+    </div>
+    <button class="gear" id="gearBtn" type="button" aria-label="设置" title="设置">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.86 1 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+  </header>
+
+  <div class="dial" id="dial">
+    <svg class="dial-svg" viewBox="0 0 320 320" aria-hidden="true">
+      <circle class="track" cx="160" cy="160" r="140"></circle>
+      <circle class="prog" id="prog" cx="160" cy="160" r="140"></circle>
+    </svg>
+    <div class="dial-center">
+      <div class="phase" id="phase">准备</div>
+      <div class="time" id="time">00:10</div>
+      <div class="meta" id="meta">共 4 组</div>
+    </div>
+  </div>
+
+  <div class="dots" id="dots" aria-hidden="true"></div>
+
+  <div class="actions">
+    <button class="btn ghost" id="resetBtn" type="button">重置</button>
+    <button class="btn primary" id="mainBtn" type="button">开始</button>
+    <button class="btn ghost" id="skipBtn" type="button" disabled>跳过</button>
+  </div>
+
+  <section class="panel" id="panel" hidden>
+    <div class="row">
+      <label for="inSets">组数</label>
+      <div class="field">
+        <input class="num" id="inSets" type="number" min="1" max="99" inputmode="numeric" value="4" />
+        <span class="u">组</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <label for="inWm">每组坚持</label>
+      <div class="field">
+        <input class="num" id="inWm" type="number" min="0" max="99" inputmode="numeric" value="1" />
+        <span class="u">分</span>
+        <input class="num" id="inWs" type="number" min="0" max="59" inputmode="numeric" value="0" />
+        <span class="u">秒</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <label for="inRm">组间休息</label>
+      <div class="field">
+        <input class="num" id="inRm" type="number" min="0" max="99" inputmode="numeric" value="1" />
+        <span class="u">分</span>
+        <input class="num" id="inRs" type="number" min="0" max="59" inputmode="numeric" value="0" />
+        <span class="u">秒</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <label for="inPrep">开始前准备</label>
+      <div class="field">
+        <input class="num" id="inPrep" type="number" min="0" max="60" inputmode="numeric" value="10" />
+        <span class="u">秒</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <label for="chkWait" title="休息结束后暂停，手动点开始才进入下一组">手动开始下一组</label>
+      <span class="switch">
+        <input id="chkWait" type="checkbox" checked />
+        <i></i>
+      </span>
+    </div>
+
+    <div class="row">
+      <label for="chkNotify" title="阶段切换时弹出系统通知气泡，切到别的窗口也能收到">弹出通知气泡</label>
+      <span class="switch">
+        <input id="chkNotify" type="checkbox" />
+        <i></i>
+      </span>
+    </div>
+
+    <p class="warn" id="notifyWarn" hidden></p>
+    <p class="hint">快捷键：空格 开始 / 暂停 · S 跳过 · R 重置</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var R = 140;
+  var CIR = 2 * Math.PI * R;
+  var KEY = 'interval-timer-v1';
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var ui = {
+    sub: $('sub'), phase: $('phase'), time: $('time'), meta: $('meta'),
+    prog: $('prog'), dots: $('dots'), dial: $('dial'),
+    main: $('mainBtn'), reset: $('resetBtn'), skip: $('skipBtn'),
+    gear: $('gearBtn'), panel: $('panel'),
+    sets: $('inSets'), wm: $('inWm'), ws: $('inWs'),
+    rm: $('inRm'), rs: $('inRs'), prep: $('inPrep'),
+    wait: $('chkWait'), notify: $('chkNotify'), notifyWarn: $('notifyWarn')
+  };
+
+  var cfg = { sets: 4, wm: 1, ws: 0, rm: 1, rs: 0, prep: 10, manualNext: true, notify: false };
+
+  // 状态机：idle -> prepare -> work -> rest -> work ... -> done
+  var S = {
+    phase: 'idle',
+    set: 1,
+    endAt: 0,
+    dur: 0,
+    remain: 0,
+    paused: false,
+    lastSec: -1
+  };
+
+  var loop = null;
+  var wake = null;
+
+  // ---------- 小工具 ----------
+  function clampNum(v, lo, hi) {
+    var n = Math.round(Number(v));
+    if (!isFinite(n)) n = lo;
+    return Math.min(hi, Math.max(lo, n));
+  }
+
+  function pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+  function fmt(ms) {
+    var t = Math.max(0, Math.ceil(ms / 1000));
+    return pad2(Math.floor(t / 60)) + ':' + pad2(t % 60);
+  }
+
+  function durText(s) {
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    if (m && r) return m + ' 分 ' + r + ' 秒';
+    if (m) return m + ' 分';
+    return r + ' 秒';
+  }
+
+  function workSec() { return cfg.wm * 60 + cfg.ws; }
+  function restSec() { return cfg.rm * 60 + cfg.rs; }
+
+  function totalSec() {
+    return cfg.prep + cfg.sets * workSec() + Math.max(0, cfg.sets - 1) * restSec();
+  }
+
+  // ---------- 主题 ----------
+  var THEMES = {
+    idle:    { c: '#3b82f6', label: '准备' },
+    prepare: { c: '#3b82f6', label: '准备' },
+    work:    { c: '#f4511e', label: '坚持' },
+    rest:    { c: '#0d9488', label: '休息' },
+    done:    { c: '#7c3aed', label: '完成' }
+  };
+
+  function theme(p) {
+    var t = THEMES[p] || THEMES.idle;
+    document.documentElement.style.setProperty('--accent', t.c);
+  }
+
+  // ---------- 视觉提示 ----------
+  function flashDial() {
+    ui.dial.classList.remove('flash');
+    void ui.dial.offsetWidth;
+    ui.dial.classList.add('flash');
+  }
+
+  function beat() {
+    ui.time.classList.remove('beat');
+    void ui.time.offsetWidth;
+    ui.time.classList.add('beat');
+  }
+
+  // ---------- 系统通知气泡 ----------
+  function notify(title, body, stick) {
+    if (!cfg.notify) return;
+    try {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      var n = new Notification(title, {
+        body: body,
+        tag: 'interval-timer',      // 同名替换，不堆积
+        silent: true,               // 用户不要声音，系统提示音也关掉
+        requireInteraction: !!stick // 待开始/完成时的通知停留，直到用户处理
+      });
+      n.onclick = function () {
+        try { window.focus(); n.close(); } catch (e) { /* 忽略 */ }
+      };
+    } catch (e) { /* 忽略 */ }
+  }
+
+  var warnTimer = null;
+  function showWarn(text) {
+    ui.notifyWarn.textContent = text;
+    ui.notifyWarn.hidden = false;
+    if (warnTimer) clearTimeout(warnTimer);
+    warnTimer = setTimeout(function () { ui.notifyWarn.hidden = true; }, 6000);
+  }
+
+  // ---------- 屏幕常亮 ----------
+  function requestWake() {
+    try {
+      if (!('wakeLock' in navigator) || !navigator.wakeLock) return;
+      if (wake) return;
+      navigator.wakeLock.request('screen').then(function (w) {
+        wake = w;
+        w.addEventListener('release', function () { wake = null; });
+      })['catch'](function () { wake = null; });
+    } catch (e) { wake = null; }
+  }
+
+  function releaseWake() {
+    try {
+      if (wake) { wake.release(); wake = null; }
+    } catch (e) { /* 忽略 */ }
+  }
+
+  // ---------- 渲染 ----------
+  function paintSub() {
+    var parts = [cfg.sets + ' 组', '每组 ' + durText(workSec())];
+    if (cfg.sets > 1 && restSec() > 0) parts.push('休息 ' + durText(restSec()));
+    parts.push('共 ' + durText(totalSec()));
+    ui.sub.textContent = parts.join(' · ');
+  }
+
+  function paintDots() {
+    ui.dots.innerHTML = '';
+    if (cfg.sets > 16) return;
+    for (var k = 1; k <= cfg.sets; k++) {
+      var d = document.createElement('i');
+      if (S.phase !== 'idle') {
+        if (S.phase === 'done' || k < S.set) d.className = 'done';
+        else if (k === S.set) d.className = 'cur';
+      }
+      ui.dots.appendChild(d);
+    }
+  }
+
+  function paintButtons() {
+    var running = S.phase !== 'idle' && S.phase !== 'done';
+    if (S.phase === 'idle') ui.main.textContent = '开始';
+    else if (S.phase === 'done') ui.main.textContent = '再来一次';
+    else if (S.phase === 'wait') ui.main.textContent = '开始';
+    else if (S.paused) ui.main.textContent = '继续';
+    else ui.main.textContent = '暂停';
+
+    ui.skip.disabled = !running || S.paused || S.phase === 'wait';
+    ui.gear.disabled = running;
+
+    if (running) {
+      ui.panel.hidden = true;
+      ui.gear.classList.remove('on');
+    }
+  }
+
+  function paintPhase() {
+    if (S.phase === 'prepare') {
+      ui.phase.textContent = '准备';
+      ui.meta.textContent = '共 ' + cfg.sets + ' 组 · 第 1 组即将开始';
+    } else if (S.phase === 'work') {
+      ui.phase.textContent = '坚持';
+      ui.meta.textContent = '第 ' + S.set + ' / ' + cfg.sets + ' 组';
+    } else if (S.phase === 'rest') {
+      ui.phase.textContent = '休息';
+      ui.meta.textContent = '第 ' + S.set + ' 组完成 · 还剩 ' + (cfg.sets - S.set) + ' 组';
+    }
+  }
+
+  function paintTime(left) {
+    ui.time.textContent = fmt(left);
+    var ratio = S.dur > 0 ? Math.min(1, Math.max(0, left / S.dur)) : 0;
+    ui.prog.style.strokeDashoffset = String(CIR * (1 - ratio));
+    ui.prog.style.opacity = ratio < 0.004 ? '0' : '1';
+    document.title = fmt(left) + ' · ' + (THEMES[S.phase] || THEMES.idle).label;
+  }
+
+  // ---------- 状态流转 ----------
+  function phaseMs(p) {
+    if (p === 'prepare') return cfg.prep * 1000;
+    if (p === 'work') return workSec() * 1000;
+    if (p === 'rest') return restSec() * 1000;
+    return 0;
+  }
+
+  function enter(p) {
+    S.phase = p;
+    S.paused = false;
+    S.dur = Math.max(400, phaseMs(p));
+    S.endAt = performance.now() + S.dur;
+    S.lastSec = -1;
+
+    theme(p);
+    ui.time.classList.remove('sm', 'hot', 'beat');
+    paintPhase();
+    paintDots();
+    paintButtons();
+    flashDial();
+
+    if (p === 'work') notify('间歇训练', '第 ' + S.set + ' 组，开始');
+    else if (p === 'rest') notify('间歇训练', '第 ' + S.set + ' 组完成，休息一下');
+  }
+
+  function advance() {
+    if (S.phase === 'prepare') { enter('work'); return; }
+    if (S.phase === 'work') {
+      if (S.set >= cfg.sets) { finish(); return; }
+      enter('rest');
+      return;
+    }
+    if (S.phase === 'rest') {
+      S.set += 1;
+      if (cfg.manualNext) { enterWait(); return; }
+      enter('work');
+    }
+  }
+
+  // 休息结束后的「待开始」：停在原地，等手动点开始
+  function enterWait() {
+    stopLoop();
+    S.phase = 'wait';
+    S.paused = false;
+    S.endAt = 0;
+    S.remain = 0;
+    S.lastSec = -1;
+
+    theme('idle');
+    ui.time.classList.remove('sm', 'hot', 'beat');
+    ui.time.textContent = fmt(Math.max(1000, workSec() * 1000));
+    ui.prog.style.strokeDashoffset = '0';
+    ui.prog.style.opacity = '1';
+    ui.phase.textContent = '准备';
+    ui.meta.textContent = '第 ' + S.set + ' / ' + cfg.sets + ' 组 · 点开始继续';
+    ui.dial.classList.remove('flash');
+
+    paintDots();
+    paintButtons();
+    document.title = '待开始 · 间歇训练';
+    notify('间歇训练', '休息结束，第 ' + S.set + ' 组等你点开始', true);
+  }
+
+  function finish() {
+    stopLoop();
+    releaseWake();
+    S.phase = 'done';
+    S.paused = false;
+
+    theme('done');
+    ui.time.textContent = '完成';
+    ui.time.classList.remove('hot', 'beat');
+    ui.time.classList.add('sm');
+    ui.phase.textContent = '训练结束';
+    ui.meta.textContent = '已完成 ' + cfg.sets + ' 组';
+    ui.prog.style.strokeDashoffset = String(CIR);
+    ui.prog.style.opacity = '1';
+
+    paintDots();
+    paintButtons();
+    document.title = '训练完成 · 间歇训练';
+    flashDial();
+    notify('间歇训练', '训练完成，共 ' + cfg.sets + ' 组', true);
+  }
+
+  function reset() {
+    stopLoop();
+    releaseWake();
+    S.phase = 'idle';
+    S.paused = false;
+    S.set = 1;
+    S.remain = 0;
+    S.endAt = 0;
+    S.lastSec = -1;
+    S.dur = (cfg.prep > 0 ? cfg.prep : Math.max(1, workSec())) * 1000;
+
+    theme('idle');
+    ui.time.classList.remove('sm', 'hot', 'beat');
+    ui.time.textContent = fmt(S.dur);
+    ui.prog.style.strokeDashoffset = '0';
+    ui.prog.style.opacity = '1';
+    ui.phase.textContent = '准备';
+    ui.meta.textContent = '共 ' + cfg.sets + ' 组';
+    ui.dial.classList.remove('flash');
+
+    paintDots();
+    paintButtons();
+    document.title = '间歇训练计时器';
+  }
+
+  // ---------- 主循环 ----------
+  function startLoop() {
+    stopLoop();
+    loop = window.setInterval(tick, 90);
+    tick();
+  }
+
+  function stopLoop() {
+    if (loop) { clearInterval(loop); loop = null; }
+  }
+
+  function tick() {
+    if (S.phase === 'idle' || S.phase === 'done' || S.paused || S.phase === 'wait') return;
+
+    var left = S.endAt - performance.now();
+    if (left <= 0) { advance(); return; }
+
+    paintTime(left);
+
+    var sec = Math.ceil(left / 1000);
+    if (sec !== S.lastSec) {
+      S.lastSec = sec;
+      var hot = S.dur > 4000 && sec <= 3 && sec >= 1;
+      ui.time.classList.toggle('hot', hot);
+      if (hot) beat();
+    }
+  }
+
+  // ---------- 交互 ----------
+  function onMain() {
+    if (S.phase === 'idle' || S.phase === 'done') {
+      S.set = 1;
+      if (cfg.prep > 0) enter('prepare');
+      else enter('work');
+      requestWake();
+      startLoop();
+      return;
+    }
+
+    if (S.phase === 'wait') {
+      enter('work');
+      startLoop();
+      return;
+    }
+
+    if (S.paused) {
+      S.paused = false;
+      S.endAt = performance.now() + S.remain;
+      S.lastSec = -1;
+      paintPhase();
+      paintButtons();
+      requestWake();
+      startLoop();
+    } else {
+      S.remain = Math.max(0, S.endAt - performance.now());
+      S.paused = true;
+      ui.phase.textContent = '已暂停';
+      ui.meta.textContent = '点击继续，或按空格';
+      paintButtons();
+      stopLoop();
+    }
+  }
+
+  function onSkip() {
+    if (S.phase === 'idle' || S.phase === 'done' || S.phase === 'wait') return;
+    advance();
+  }
+
+  // ---------- 设置 ----------
+  function paintInputs() {
+    ui.sets.value = cfg.sets;
+    ui.wm.value = cfg.wm;
+    ui.ws.value = cfg.ws;
+    ui.rm.value = cfg.rm;
+    ui.rs.value = cfg.rs;
+    ui.prep.value = cfg.prep;
+    ui.wait.checked = !!cfg.manualNext;
+    ui.notify.checked = !!cfg.notify;
+  }
+
+  function readInputs() {
+    cfg.sets = clampNum(ui.sets.value, 1, 99);
+    cfg.wm = clampNum(ui.wm.value, 0, 99);
+    cfg.ws = clampNum(ui.ws.value, 0, 59);
+    cfg.rm = clampNum(ui.rm.value, 0, 99);
+    cfg.rs = clampNum(ui.rs.value, 0, 59);
+    cfg.prep = clampNum(ui.prep.value, 0, 60);
+
+    // 每组至少 5 秒，避免无意义的空转
+    if (cfg.wm === 0 && cfg.ws < 5) cfg.ws = 5;
+
+    save();
+    paintInputs();
+    paintSub();
+    reset();
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) { /* 忽略 */ }
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== 'object') return;
+      if (typeof o.sets === 'number') cfg.sets = o.sets;
+      if (typeof o.wm === 'number') cfg.wm = o.wm;
+      if (typeof o.ws === 'number') cfg.ws = o.ws;
+      if (typeof o.rm === 'number') cfg.rm = o.rm;
+      if (typeof o.rs === 'number') cfg.rs = o.rs;
+      if (typeof o.prep === 'number') cfg.prep = o.prep;
+      if (typeof o.manualNext === 'boolean') cfg.manualNext = o.manualNext;
+      if (typeof o.notify === 'boolean') cfg.notify = o.notify;
+
+      cfg.sets = clampNum(cfg.sets, 1, 99);
+      cfg.wm = clampNum(cfg.wm, 0, 99);
+      cfg.ws = clampNum(cfg.ws, 0, 59);
+      cfg.rm = clampNum(cfg.rm, 0, 99);
+      cfg.rs = clampNum(cfg.rs, 0, 59);
+      cfg.prep = clampNum(cfg.prep, 0, 60);
+    } catch (e) { /* 忽略 */ }
+  }
+
+  function bind() {
+    ui.main.addEventListener('click', onMain);
+    ui.skip.addEventListener('click', onSkip);
+    ui.reset.addEventListener('click', reset);
+
+    ui.gear.addEventListener('click', function () {
+      var open = ui.panel.hidden;
+      ui.panel.hidden = !open;
+      ui.gear.classList.toggle('on', open);
+    });
+
+    [ui.sets, ui.wm, ui.ws, ui.rm, ui.rs, ui.prep].forEach(function (inp) {
+      inp.addEventListener('change', readInputs);
+    });
+
+    ui.wait.addEventListener('change', function () {
+      cfg.manualNext = ui.wait.checked;
+      save();
+    });
+
+    ui.notify.addEventListener('change', function () {
+      var want = ui.notify.checked;
+      if (!want) {
+        cfg.notify = false;
+        save();
+        return;
+      }
+      // 打开开关：先确认浏览器支持并请求授权
+      if (!('Notification' in window)) {
+        ui.notify.checked = false;
+        showWarn('此浏览器不支持通知气泡');
+        return;
+      }
+      var self = this;
+      try {
+        Notification.requestPermission().then(function (p) {
+          if (p === 'granted') {
+            cfg.notify = true;
+            save();
+            notify('间歇训练', '通知已开启，阶段切换时会在这里提醒你');
+          } else {
+            cfg.notify = false;
+            save();
+            ui.notify.checked = false;
+            showWarn('浏览器拒绝了通知权限：可在地址栏左侧的图标里重新允许');
+          }
+        })['catch'](function () {
+          ui.notify.checked = false;
+          showWarn('无法开启通知，请稍后再试');
+        });
+      } catch (e) {
+        ui.notify.checked = false;
+        showWarn('无法开启通知：' + (e && e.message ? e.message : '未知错误'));
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      var tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        onMain();
+      } else if (e.key === 'r' || e.key === 'R') {
+        reset();
+      } else if (e.key === 's' || e.key === 'S') {
+        onSkip();
+      }
+    });
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState !== 'visible') return;
+      if (S.phase === 'idle' || S.phase === 'done' || S.paused) return;
+      requestWake();
+      tick();
+    });
+  }
+
+  // ---------- 启动 ----------
+  load();
+  ui.prog.style.strokeDasharray = String(CIR);
+  bind();
+  paintInputs();
+  paintSub();
+  reset();
+})();
+</script>
+</body>
+</html>
