@@ -597,6 +597,14 @@
     </div>
 
     <div class="row">
+      <label for="chkExtra" title="最后一组结束后再计一次休息，适合做完直接拉伸放松">多记一次休息</label>
+      <span class="switch">
+        <input id="chkExtra" type="checkbox" />
+        <i></i>
+      </span>
+    </div>
+
+    <div class="row">
       <label for="chkNotify" title="阶段切换时弹出提示气泡；切到其他窗口时改为系统通知">弹出提示气泡</label>
       <span class="switch">
         <input id="chkNotify" type="checkbox" />
@@ -654,7 +662,7 @@
     gear: $('gearBtn'), panel: $('panel'),
     sets: $('inSets'), wm: $('inWm'), ws: $('inWs'),
     rm: $('inRm'), rs: $('inRs'), prep: $('inPrep'),
-    wait: $('chkWait'), notify: $('chkNotify'), notifyWarn: $('notifyWarn'),
+    wait: $('chkWait'), extra: $('chkExtra'), notify: $('chkNotify'), notifyWarn: $('notifyWarn'),
     sound: $('chkSound'), styleSeg: $('styleSeg'),
     toast: $('toast'), toastText: $('toastText'),
     modal: $('modal'), modalBadge: $('modalBadge'), modalMain: $('modalMain'), modalSub: $('modalSub')
@@ -662,7 +670,7 @@
 
   var cfg = {
     sets: 4, wm: 1, ws: 0, rm: 1, rs: 0, prep: 10,
-    manualNext: true, notify: false, sound: false, style: 'modal'
+    manualNext: true, extraRest: false, notify: false, sound: false, style: 'modal'
   };
 
   // 状态机：idle -> prepare -> work -> rest -> work ... -> done
@@ -706,7 +714,9 @@
   function restSec() { return cfg.rm * 60 + cfg.rs; }
 
   function totalSec() {
-    return cfg.prep + cfg.sets * workSec() + Math.max(0, cfg.sets - 1) * restSec();
+    // 勾选「多记一次休息」时，最后一组之后也算一段休息
+    var rests = cfg.extraRest ? cfg.sets : Math.max(0, cfg.sets - 1);
+    return cfg.prep + cfg.sets * workSec() + rests * restSec();
   }
 
   // ---------- 主题 ----------
@@ -891,7 +901,8 @@
   // ---------- 渲染 ----------
   function paintSub() {
     var parts = [cfg.sets + ' 组', '每组 ' + durText(workSec())];
-    if (cfg.sets > 1 && restSec() > 0) parts.push('休息 ' + durText(restSec()));
+    // 只有 1 组时本来没有休息，但开了「多记一次休息」就有了
+    if ((cfg.sets > 1 || cfg.extraRest) && restSec() > 0) parts.push('休息 ' + durText(restSec()));
     parts.push('共 ' + durText(totalSec()));
     ui.sub.textContent = parts.join(' · ');
   }
@@ -899,10 +910,12 @@
   function paintDots() {
     ui.dots.innerHTML = '';
     if (cfg.sets > 16) return;
+    // 最后一组之后的收尾休息里，所有组都算已完成
+    var allDone = S.phase === 'done' || (S.phase === 'rest' && S.set >= cfg.sets);
     for (var k = 1; k <= cfg.sets; k++) {
       var d = document.createElement('i');
       if (S.phase !== 'idle') {
-        if (S.phase === 'done' || k < S.set) d.className = 'done';
+        if (allDone || k < S.set) d.className = 'done';
         else if (k === S.set) d.className = 'cur';
       }
       ui.dots.appendChild(d);
@@ -934,8 +947,13 @@
       ui.phase.textContent = '坚持';
       ui.meta.textContent = '第 ' + S.set + ' / ' + cfg.sets + ' 组';
     } else if (S.phase === 'rest') {
-      ui.phase.textContent = '休息';
-      ui.meta.textContent = '第 ' + S.set + ' 组完成 · 还剩 ' + (cfg.sets - S.set) + ' 组';
+      if (S.set >= cfg.sets) {
+        ui.phase.textContent = '收尾';
+        ui.meta.textContent = '全部 ' + cfg.sets + ' 组完成 · 放松一下';
+      } else {
+        ui.phase.textContent = '休息';
+        ui.meta.textContent = '第 ' + S.set + ' 组完成 · 还剩 ' + (cfg.sets - S.set) + ' 组';
+      }
     }
   }
 
@@ -953,6 +971,13 @@
     if (p === 'work') return workSec() * 1000;
     if (p === 'rest') return restSec() * 1000;
     return 0;
+  }
+
+  // 进入休息时的提示：最后一组之后是「收尾休息」，文案换一种说法
+  function restCue() {
+    if (S.set >= cfg.sets) prompt('全部 ' + cfg.sets + ' 组完成', '收尾休息');
+    else prompt('第 ' + S.set + ' 组完成', '休息一下');
+    ring('rest');
   }
 
   function enter(p, startAt, quiet) {
@@ -974,8 +999,7 @@
         prompt('第 ' + S.set + ' 组', '开始');
         ring('work');
       } else if (p === 'rest') {
-        prompt('第 ' + S.set + ' 组完成', '休息一下');
-        ring('rest');
+        restCue();
       }
     }
   }
@@ -984,17 +1008,24 @@
   // quiet: 补偿跳跃时静默，避免连发一串动画和通知
   function advanceAt(t, quiet) {
     if (S.phase === 'prepare') { enter('work', t, quiet); return true; }
+
     if (S.phase === 'work') {
-      if (S.set >= cfg.sets) { finish(); return false; }
+      var last = S.set >= cfg.sets;
+      // 最后一组：只有勾了「多记一次休息」且休息时长不为 0，才补一段收尾休息
+      if (last && !(cfg.extraRest && restSec() > 0)) { finish(); return false; }
       enter('rest', t, quiet);
       return true;
     }
+
     if (S.phase === 'rest') {
+      // 走到这里说明这是最后一组之后的收尾休息，结束即完成，不再进下一组
+      if (S.set >= cfg.sets) { finish(); return false; }
       S.set += 1;
       if (cfg.manualNext) { enterWait(); return false; }
       enter('work', t, quiet);
       return true;
     }
+
     return false;
   }
 
@@ -1050,6 +1081,13 @@
     ring('done');
   }
 
+  // 空闲态圆环中心的那行小字
+  function paintIdleMeta() {
+    ui.meta.textContent = cfg.extraRest && restSec() > 0
+      ? '共 ' + cfg.sets + ' 组 · 含收尾休息'
+      : '共 ' + cfg.sets + ' 组';
+  }
+
   function reset() {
     stopLoop();
     releaseWake();
@@ -1068,7 +1106,7 @@
     ui.prog.style.strokeDashoffset = '0';
     ui.prog.style.opacity = '1';
     ui.phase.textContent = '准备';
-    ui.meta.textContent = '共 ' + cfg.sets + ' 组';
+    paintIdleMeta();
     ui.dial.classList.remove('flash');
 
     paintDots();
@@ -1137,8 +1175,7 @@
         prompt('第 ' + S.set + ' 组', '开始');
         ring('work');
       } else if (S.phase === 'rest') {
-        prompt('第 ' + S.set + ' 组完成', '休息一下');
-        ring('rest');
+        restCue();
       }
     }
 
@@ -1207,6 +1244,7 @@
     ui.rs.value = cfg.rs;
     ui.prep.value = cfg.prep;
     ui.wait.checked = !!cfg.manualNext;
+    ui.extra.checked = !!cfg.extraRest;
     ui.notify.checked = !!cfg.notify;
     ui.sound.checked = !!cfg.sound;
     paintSeg();
@@ -1253,6 +1291,7 @@
       if (typeof o.rs === 'number') cfg.rs = o.rs;
       if (typeof o.prep === 'number') cfg.prep = o.prep;
       if (typeof o.manualNext === 'boolean') cfg.manualNext = o.manualNext;
+      if (typeof o.extraRest === 'boolean') cfg.extraRest = o.extraRest;
       if (typeof o.notify === 'boolean') cfg.notify = o.notify;
       if (typeof o.sound === 'boolean') cfg.sound = o.sound;
       if (o.style === 'toast' || o.style === 'modal') cfg.style = o.style;
@@ -1284,6 +1323,14 @@
     ui.wait.addEventListener('change', function () {
       cfg.manualNext = ui.wait.checked;
       save();
+    });
+
+    // 只影响总时长和最后一组的走向，不用重置当前进度
+    ui.extra.addEventListener('change', function () {
+      cfg.extraRest = ui.extra.checked;
+      save();
+      paintSub();
+      if (S.phase === 'idle') paintIdleMeta();
     });
 
     ui.sound.addEventListener('change', function () {
